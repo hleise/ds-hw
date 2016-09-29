@@ -1,0 +1,6 @@
+* My approach to solving these problems was to first understand the applicable content we've been learning in lectures by reviewing lecture slides and watching some videos on n-gram language models. From there it was mostly just turning equations into code, except for the republican_share function, which I needed to use some my understanding of the data from lab 1.
+* Colorado's congressional districts look more like the congressional districts of states that Obama won since the returned probabilities are higher in most of the districts for Obama than Romney.
+*
+* moonshot
+*
+*
