@@ -2,5 +2,5 @@
 * Colorado's congressional districts look more like the congressional districts of states that Obama won since the returned probabilities are higher in most of the districts for Obama than Romney.
 *
 * moonshot
-*
+* ('unconditional', 'love')
 *

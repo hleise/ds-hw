@@ -194,6 +194,7 @@ if __name__ == "__main__":
     with open("../data/2016-obama.txt", encoding='utf8') as infile:
         print("REP\t\tDEM\t\tSentence\n" + "=" * 80)
         unusedwords = set()
+        unusedbg = set()
         for ii in infile:
             if len(ii) < 15: # Ignore short sentences
                 continue
@@ -201,6 +202,10 @@ if __name__ == "__main__":
                 for word in tokenize(ii):
                     if (word not in rep_lm._vocab) and (word not in dem_lm._vocab):
                         unusedwords.add(word)
+
+                for context, word in bigrams(list(rep_lm.tokenize_and_censor(ii))):
+                    if (word not in rep_lm._bg_counter) and (word not in dem_lm._bg_counter):
+                        unusedbg.add((context, word))
 
                 #dem_score = dem_lm.log_likelihood(ii)
                 #rep_score = rep_lm.log_likelihood(ii)
@@ -210,3 +215,6 @@ if __name__ == "__main__":
                 None
             
         print(unusedwords)
+        print(unusedbg)
+        print(rep_lm.sample(1))
+        #print(list(dem_lm.sample(1)))
