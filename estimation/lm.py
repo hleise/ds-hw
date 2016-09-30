@@ -1,4 +1,5 @@
 from math import log, exp
+from random import random
 from collections import defaultdict, Counter
 from zipfile import ZipFile
 import re
@@ -15,7 +16,7 @@ kDEM = set(["Carter", "Clinton", "Truman", "Johnson", "Kennedy"])
 class OutOfVocab(Exception):
     def __init__(self, value):
         self.value = value
-        
+
     def __str__(self):
         return repr(self.value)
 
@@ -39,14 +40,14 @@ def tokenize(sentence):
     """
     Given a sentence, return a list of all the words in the sentence.
     """
-    
+
     return kWORDS.findall(sentence.lower())
 
 def bigrams(sentence):
     """
     Given a sentence, generate all bigrams in the sentence.
     """
-    
+
     for ii, ww in enumerate(sentence[:-1]):
         yield ww, sentence[ii + 1]
 
@@ -57,6 +58,7 @@ class BigramLanguageModel:
     def __init__(self):
         self._vocab = set([kSTART, kEND])
         self._bg_counter = Counter()
+        self._ug_counter = Counter()
         self._vocab_final = False
 
     def train_seen(self, word):
@@ -72,23 +74,20 @@ class BigramLanguageModel:
     def generate(self, context):
         """
         Given the previous word of a context, generate a next word from its
-        conditional language model probability.  
+        conditional language model probability.
         """
 
         # Add your code here.  Make sure to the account for the case
         # of a context you haven't seen before and Don't forget the
         # smoothing "+1" term while sampling.
 
-        next_word = ""
-        max = kNEG_INF
+        bin = 0
+        threshold = random()
         for word in self._vocab:
-            probability = self.laplace(context, word)
-            if probability > max:
-                next_word = word
-                max = probability
+            bin += exp(self.laplace(context, word))
+            if (bin > threshold):
+                return word
 
-        return next_word
-            
     def sample(self, sample_size):
         """
         Generate an English-like string from a language model of a specified
@@ -105,15 +104,15 @@ class BigramLanguageModel:
             else:
                 yield next
         yield kEND
-            
+
     def finalize(self):
         """
         Fixes the vocabulary as static, prevents keeping additional vocab from
         being added
         """
-        
+
         # you should not need to modify this function
-        
+
         self._vocab_final = True
 
     def tokenize_and_censor(self, sentence):
@@ -124,7 +123,7 @@ class BigramLanguageModel:
         """
 
         # you should not need to modify this function
-        
+
         yield kSTART
         for ii in tokenize(sentence):
             if ii not in self._vocab:
@@ -139,7 +138,7 @@ class BigramLanguageModel:
 
         assert self._vocab_final, "Vocab not finalized"
         return list(sorted(self._vocab))
-        
+
     def laplace(self, context, word):
         """
         Return the log probability (base e) of a word given its context
@@ -149,7 +148,7 @@ class BigramLanguageModel:
         assert word in self._vocab, "%s not in vocab" % word
 
         bg_count = self._bg_counter[(context, word)] # How many times the given bigram occured
-        context_count = sum(count for bg, count in self._bg_counter.items() if bg[0] == context) # How many times the context occured as the context of a bigram
+        context_count = self._ug_counter[context] # How many times the context occured
 
         return log((bg_count + 1) / (len(self._vocab) + context_count))
 
@@ -160,10 +159,13 @@ class BigramLanguageModel:
 
         # You'll need to complete this function, but here's a line of code that
         # will hopefully get you started.
-        for context, word in bigrams(list(self.tokenize_and_censor(sentence))):
-            self._bg_counter.update({(context, word)})
-            # ---------------------------------------
+        tokenizedSentence = list(self.tokenize_and_censor(sentence))
+        for context, word in bigrams(tokenizedSentence):
             assert word in self._vocab, "%s not in vocab" % word
+            self._bg_counter.update({(context, word)})
+
+        for word in tokenizedSentence:
+            self._ug_counter.update([word])
 
     def log_likelihood(self, sentence):
         """
@@ -182,30 +184,30 @@ if __name__ == "__main__":
         for sent in sentences_from_zipfile("../data/state_union.zip", pres):
             for ww in tokenize(sent):
                 target.train_seen(ww)
-                
+
         print("Done looking at %s words, finalizing vocabulary" % name)
         target.finalize()
-        
+
         for sent in sentences_from_zipfile("../data/state_union.zip", pres):
             target.add_train(sent)
-    
+
         print("Trained language model for %s" % name)
 
     with open("../data/2016-obama.txt", encoding='utf8') as infile:
         print("REP\t\tDEM\t\tSentence\n" + "=" * 80)
-        unusedwords = set()
-        unusedbg = set()
+        unused_words = set()
+        unused_bg = set()
         for ii in infile:
             if len(ii) < 15: # Ignore short sentences
                 continue
             try:
                 for word in tokenize(ii):
                     if (word not in rep_lm._vocab) and (word not in dem_lm._vocab):
-                        unusedwords.add(word)
+                        unused_words.add(word)
 
                 for context, word in bigrams(list(rep_lm.tokenize_and_censor(ii))):
                     if (word not in rep_lm._bg_counter) and (word not in dem_lm._bg_counter):
-                        unusedbg.add((context, word))
+                        unused_bg.add((context, word))
 
                 #dem_score = dem_lm.log_likelihood(ii)
                 #rep_score = rep_lm.log_likelihood(ii)
@@ -213,8 +215,8 @@ if __name__ == "__main__":
                 #print("%f\t%f\t%s" % (dem_score, rep_score, ii.strip()))
             except OutOfVocab:
                 None
-            
-        print(unusedwords)
-        print(unusedbg)
-        print(rep_lm.sample(1))
-        #print(list(dem_lm.sample(1)))
+
+        print(unused_words)
+        print(unused_bg)
+        print(' '.join(rep_lm.sample(10)))
+        print(' '.join(dem_lm.sample(10)))

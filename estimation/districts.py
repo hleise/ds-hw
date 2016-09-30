@@ -6,6 +6,7 @@ from csv import DictReader
 from collections import defaultdict
 from math import log
 from math import pi as kPI
+import matplotlib.pyplot as plt
 
 kOBAMA = set(["D.C.", "Hawaii", "Vermont", "New York", "Rhode Island",
               "Maryland", "California", "Massachusetts", "Delaware", "New Jersey",
@@ -93,3 +94,12 @@ if __name__ == "__main__":
         romney_prob = log_probability(colorado[(co, dist)], romney_mean, romney_var)
 
         print("District %i\t%f\t%f" % (dist, obama_prob, romney_prob))
+
+    # Code for making the obama vs. romney histogram
+    obama = list(republican_share(lines, kOBAMA).values())
+    romney = list(republican_share(lines, kROMNEY).values())
+    plt.hist(obama, bins = 50, range = [0, 100], alpha= 0.5, label = "Obama")
+    plt.hist(romney, bins = 50, range =[0, 100], alpha=0.5, label="Romney")
+    plt.title("Obama v. Romney Republican Shares")
+    plt.legend(loc = 1)
+    plt.show()

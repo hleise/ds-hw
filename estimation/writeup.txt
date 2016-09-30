@@ -1,6 +1,12 @@
-* My approach to solving these problems was to first understand the applicable content we've been learning in lectures by reviewing lecture slides and watching some videos on n-gram language models. From there it was mostly just turning equations into code, except for the republican_share function, which I needed to use some my understanding of the data from lab 1.
+* My approach to solving these problems was to first understand the applicable content we've been learning in lectures by reviewing lecture slides and watching some videos on n-gram language models. From there it was mostly just turning equations into code, except for the republican_share function, which I needed to use some of my understanding of the data from lab 1.
+
 * Colorado's congressional districts look more like the congressional districts of states that Obama won since the returned probabilities are higher in most of the districts for Obama than Romney.
-*
-* moonshot
-* ('unconditional', 'love')
-*
+
+* It is reasonable to assume that these are a normal distribution. Despite the second spike Obama has around 60, both generally follow a normal distribution curve.
+
+* "moonshot" is a word that Obama said that no previous president said.
+
+* ('unconditional', 'love') is a bigram that Obama said that no previous president said.
+
+* Republican sentence: <s> some curing jefferson controlled engaged fleet water covered civic looks </s>
+  Democrat sentence: <s> all pride meals follow basics mammograms impels having diplomatic struggle </s>
