@@ -201,22 +201,27 @@ if __name__ == "__main__":
             if len(ii) < 15: # Ignore short sentences
                 continue
             try:
+                # Calculates the unique words Obama used
                 for word in tokenize(ii):
                     if (word not in rep_lm._vocab) and (word not in dem_lm._vocab):
                         unused_words.add(word)
 
+                # Calculates the unique bigrams Obama used
                 for context, word in bigrams(list(rep_lm.tokenize_and_censor(ii))):
                     if (word not in rep_lm._bg_counter) and (word not in dem_lm._bg_counter):
                         unused_bg.add((context, word))
 
-                #dem_score = dem_lm.log_likelihood(ii)
-                #rep_score = rep_lm.log_likelihood(ii)
+                dem_score = dem_lm.log_likelihood(ii)
+                rep_score = rep_lm.log_likelihood(ii)
 
-                #print("%f\t%f\t%s" % (dem_score, rep_score, ii.strip()))
+                print("%f\t%f\t%s" % (dem_score, rep_score, ii.strip()))
             except OutOfVocab:
                 None
 
+        # Prints unique words and bigrams Obama used
         print(unused_words)
         print(unused_bg)
+
+        # Prints a republican and democrat sentence
         print(' '.join(rep_lm.sample(10)))
         print(' '.join(dem_lm.sample(10)))
