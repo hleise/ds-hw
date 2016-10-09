@@ -60,11 +60,10 @@ def chisquare_pvalue(obs, ex):
     corresponding chisquared p-value.
 
     @param obs An array (list of lists or numpy array) of observed values
-    @param obs An array (list of lists or numpy array) of expected values
+    @param ex An array (list of lists or numpy array) of expected values
     """
 
-
-    return 1.0
+    return chisquare(obs.flatten(), ex.flatten(), 2).pvalue
 
 class BigramFinder:
     """
@@ -76,7 +75,7 @@ class BigramFinder:
         """
         Instantiates the class.
 
-        @param min_ngram Ignore bigrams that appear fewer than this many times 
+        @param min_unigram Ignore bigrams that appear fewer than this many times
 
         @param max_unigram Ignore words that appear more than this many times
 
@@ -163,11 +162,9 @@ class BigramFinder:
         then score bigrams.
         """
         assert self._vocab is not None, "Adding counts before finalizing vocabulary"
-        
-        # Your code here
+
         for ll, rr in bigrams(sentence):
             None
-            # Your code here
 
     def valid_bigrams(self):
         """
