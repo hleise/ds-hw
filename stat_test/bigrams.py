@@ -75,7 +75,7 @@ class BigramFinder:
         """
         Instantiates the class.
 
-        @param min_unigram Ignore bigrams that appear fewer than this many times
+        @param min_nigram Ignore bigrams that appear fewer than this many times
 
         @param max_unigram Ignore words that appear more than this many times
 
@@ -95,6 +95,7 @@ class BigramFinder:
         # You may want to add additional data structures here.
 
         self._unigram = Counter()
+        self._bigram = Counter()
 
     def observed_and_expected(self, bigram):
         """
@@ -164,16 +165,24 @@ class BigramFinder:
         assert self._vocab is not None, "Adding counts before finalizing vocabulary"
 
         for ll, rr in bigrams(sentence):
-            None
+            self._bigram[(ll, rr)] += 1
 
     def valid_bigrams(self):
         """
         Return an iterator over the bigrams that have been seen enough to get a
         score.
         """
-        
-        # Your code here
-        return []
+
+        iterator = []
+        for ll, rr in self._bigram:
+            # Could have done all of this on one line... but that would be really long...
+            if (ll not in self._exclude) and (rr not in self._exclude): # Make sure neither are excluded words
+                if (self._unigram[ll] >= self._min_unigram) and (self._unigram[ll] <= self._max_unigram): # Make sure the left word appears enough, but not too much
+                    if (self._unigram[rr] >= self._min_unigram) and (self._unigram[rr] <= self._max_unigram): # Make sure the right word appears enough, but not too much
+                        if (self._bigram[(ll, rr)] >= self._min_ngram): # Make sure the bigram appears enough
+                            iterator.append((ll, rr))
+
+        return iterator
         
     def sorted_bigrams(self):
         """

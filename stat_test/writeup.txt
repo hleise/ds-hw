@@ -1,0 +1,2 @@
+* I began by understanding the underlying content that we went over in class, in this case, t-tests, chi-square, and their associated concepts. Next, I looked over the code as a whole to understand what it was trying to achieve and what I needed to implement. From there, I looked at what libraries were imported that I could use for help. Finally, I just implemented each function one at a time until they were all completed and passed the tests.
+*
