@@ -13,8 +13,8 @@ def degrees_of_freedom(s1, s2, n1, n2):
     @param n2 The number of observations in the second sample
     """
 
-    var_smean1 = (s1 ** 2) / n1
-    var_smean2 = (s2 ** 2) / n2
+    var_smean1 = s1 / n1
+    var_smean2 = s2 / n2
     numerator = (var_smean1 + var_smean2) ** 2
     denomenator = ((var_smean1 ** 2) / (n1 - 1)) + ((var_smean2 ** 2) / (n2 - 1))
 

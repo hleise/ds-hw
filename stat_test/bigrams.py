@@ -103,13 +103,10 @@ class BigramFinder:
 
         @bigram A tuple containing the words to score
         """
-
         obs = zeros((2, 2))
-
-
         ex = zeros((2, 2))
-
         return obs, ex
+        #return self._bigram[bigram], (len(self._bigram)/self._total_bigrams)
         
     def score(self, bigram):
         """
@@ -212,3 +209,5 @@ if __name__ == "__main__":
                 
     for ngram, score in list(bf.sorted_bigrams())[:100]:
         print("%f\t%s\t%s\t" % (score, ngram[0], ngram[1]))
+
+    print(zeros((2, 2)))
