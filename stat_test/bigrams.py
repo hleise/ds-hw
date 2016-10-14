@@ -96,6 +96,9 @@ class BigramFinder:
 
         self._unigram = Counter()
         self._bigram = Counter()
+        self._left_count = Counter()
+        self._right_count = Counter()
+        self._total_count = 0
 
     def observed_and_expected(self, bigram):
         """
@@ -103,10 +106,26 @@ class BigramFinder:
 
         @bigram A tuple containing the words to score
         """
+        ll, rr = bigram
         obs = zeros((2, 2))
         ex = zeros((2, 2))
+
+        obs[0][0] = self._bigram[(ll, rr)]
+        obs[0][1] = self._right_count[rr] - self._bigram[(ll, rr)]
+        obs[1][0] = self._left_count[ll] - self._bigram[(ll, rr)]
+        obs[1][1] = self._total_count - (obs[0][0] + obs[0][1] + obs[1][0])
+
+        row1sum = obs[0][0] + obs[0][1]
+        row2sum = obs[1][0] + obs[1][1]
+        col1sum = obs[0][0] + obs[1][0]
+        col2sum = obs[0][1] + obs[1][1]
+
+        ex[0][0] = (row1sum * col1sum) / self._total_count
+        ex[0][1] = (row1sum * col2sum) / self._total_count
+        ex[1][0] = (row2sum * col1sum) / self._total_count
+        ex[1][1] = (row2sum * col2sum) / self._total_count
+
         return obs, ex
-        #return self._bigram[bigram], (len(self._bigram)/self._total_bigrams)
         
     def score(self, bigram):
         """
@@ -163,6 +182,9 @@ class BigramFinder:
 
         for ll, rr in bigrams(sentence):
             self._bigram[(ll, rr)] += 1
+            self._left_count[ll] += 1
+            self._right_count[rr] += 1
+            self._total_count += 1
 
     def valid_bigrams(self):
         """

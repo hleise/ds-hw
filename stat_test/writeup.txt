@@ -1,2 +1,2 @@
 * I began by understanding the underlying content that we went over in class, in this case, t-tests, chi-square, and their associated concepts. Next, I looked over the code as a whole to understand what it was trying to achieve and what I needed to implement. From there, I looked at what libraries were imported that I could use for help. Finally, I just implemented each function one at a time until they were all completed and passed the tests.
-*
+* There were several bigrams included that shouldn't necessarily be considered collocations, such as, "hopeful society", "truly needy", and "farm prices". We're missing several common bigrams such as "is the" and "I am" because they're likely filtered out by valid_bigrams since each word appears more than the max_unigram count.
