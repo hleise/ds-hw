@@ -1,5 +1,9 @@
 import pandas
+import numpy as np
+
 from sklearn import linear_model, feature_extraction
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 
 def last_poll(full_data):
     """
@@ -59,24 +63,39 @@ if __name__ == "__main__":
     for dd in train_x, test_x:                
         dd["NOPOLL"] = pandas.isnull(dd["VALUE"])
         dd["VALUE"] = dd["VALUE"].fillna(0.0)
-        
-    # create feature list
-    features = list(y_data.STATE)
-    features.append("VALUE")
-    features.append("NOPOLL")    
-        
-    # fit the regression
-    mod = linear_model.LinearRegression()
-    mod.fit(train_x[features], train_x["GENERAL %"])
+
+        # create feature list
+        features = list(y_data.STATE)
+        features.append("VALUE")
+        features.append("NOPOLL")
+
+        features_par = list(y_data.PARTY)
+        features_par = [ord(i) for i in features_par]
+        features_obs = list(all_data.OBS)
+        features_val = list(all_data.VALUE)
+        features_moe = list(all_data.MOE)
+        features_matrix = []
+
+        for i in range(len(features_par)):
+            features_matrix.append([features_par[i], features_obs[i], features_val[i], features_moe[i]])
+
+        features_matrix = np.array(features_matrix)
+
+        # fit the regression
+        mod = make_pipeline(PolynomialFeatures(degree=3), linear_model.Ridge())
+        mod.fit(features_matrix, train_x["GENERAL %"])
 
     # Write out the model
-    with open("model.txt", 'w') as out:
+    '''with open("model.txt", 'w') as out:
         out.write("BIAS\t%f\n" % mod.intercept_)
         for jj, kk in zip(features, mod.coef_):
-            out.write("%s\t%f\n" % (jj, kk))
+            out.write("%s\t%f\n" % (jj, kk))'''
     
     # Write the predictions
-    pred_test = mod.predict(test_x[features])
+    pred_test = mod.predict(features_matrix)
     with open("pred.txt", 'w') as out:
         for ss, vv in sorted(zip(list(test_x.STATE), pred_test)):
             out.write("%s\t%f\n" % (ss, vv))
+
+    # Calculate the Mean Squared Error
+    print("Mean Squared Error = %.2f" % np.mean((mod.predict(features_matrix) - train_x["GENERAL %"]) ** 2))
