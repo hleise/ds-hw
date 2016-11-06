@@ -1,11 +1,6 @@
 import pandas
 from sklearn import linear_model, feature_extraction
 
-def categorical_features(row):
-    d = {}
-    d["STATE"] = row[1]["STATE"]
-    return d
-
 def last_poll(full_data):
     """
     Create feature from last poll in each state
