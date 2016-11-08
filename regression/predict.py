@@ -1,15 +1,13 @@
 import pandas
 import numpy as np
+from sklearn import linear_model
 
-from sklearn import linear_model, feature_extraction
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.pipeline import make_pipeline
 
 def last_poll(full_data):
     """
     Create feature from last poll in each state
     """
-    
+
     # Only care about republicans
     repub = full_data[full_data["PARTY"] == "Rep"]
 
@@ -20,8 +18,12 @@ def last_poll(full_data):
     dedupe = chron.drop_duplicates(subset="STATE", keep="last")
 
     # Remove national polls
-    return dedupe[dedupe["STATE"] != "US"]
-    
+    state_only = dedupe[dedupe["STATE"] != "US"]
+
+    # Remove low obs polls
+    return state_only[state_only["OBS"] >= 500]
+
+
 if __name__ == "__main__":
     # Read in the X data
     all_data = pandas.read_csv("data.csv")
@@ -30,12 +32,13 @@ if __name__ == "__main__":
     all_data = all_data[pandas.notnull(all_data["STATE"])]
 
     # split between testing and training
-    train_x = last_poll(all_data[all_data["TOPIC"] == '2012-president'])
+    last_poll_2012 = last_poll(all_data[all_data["TOPIC"] == '2012-president'])
+    train_x = last_poll_2012[last_poll_2012["MOE"] <= 3]
     train_x.set_index("STATE")
-    
+
     test_x = last_poll(all_data[all_data["TOPIC"] == '2016-president'])
     test_x.set_index("STATE")
-    
+
     # Read in the Y data
     y_data = pandas.read_csv("../data/2012_pres.csv", sep=';')
     y_data = y_data[y_data["PARTY"] == "R"]
@@ -46,8 +49,8 @@ if __name__ == "__main__":
     y_data.set_index("STATE")
 
     backup = train_x
-    train_x = y_data.merge(train_x, on="STATE",how='left')
-    
+    train_x = y_data.merge(train_x, on="STATE", how='left')
+
     # make sure we have all states in the test data
     for ii in set(y_data.STATE) - set(test_x.STATE):
         new_row = pandas.DataFrame([{"STATE": ii}])
@@ -57,45 +60,33 @@ if __name__ == "__main__":
     train_x = pandas.concat([train_x.STATE.astype(str).str.get_dummies(),
                              train_x], axis=1)
     test_x = pandas.concat([test_x.STATE.astype(str).str.get_dummies(),
-                             test_x], axis=1)
-        
+                            test_x], axis=1)
+
     # handle missing data
-    for dd in train_x, test_x:                
+    for dd in train_x, test_x:
         dd["NOPOLL"] = pandas.isnull(dd["VALUE"])
         dd["VALUE"] = dd["VALUE"].fillna(0.0)
 
-        # create feature list
-        features = list(y_data.STATE)
-        features.append("VALUE")
-        features.append("NOPOLL")
+    # create feature list
+    features = list(y_data.STATE)
+    features.append("VALUE")
+    features.append("NOPOLL")
 
-        features_par = list(y_data.PARTY)
-        features_par = [ord(i) for i in features_par]
-        features_obs = list(all_data.OBS)
-        features_val = list(all_data.VALUE)
-        features_moe = list(all_data.MOE)
-        features_matrix = []
-
-        for i in range(len(features_par)):
-            features_matrix.append([features_par[i], features_obs[i], features_val[i], features_moe[i]])
-
-        features_matrix = np.array(features_matrix)
-
-        # fit the regression
-        mod = make_pipeline(PolynomialFeatures(degree=3), linear_model.Ridge())
-        mod.fit(features_matrix, train_x["GENERAL %"])
+    # fit the regression
+    mod = linear_model.Ridge()
+    mod.fit(train_x[features], train_x["GENERAL %"])
 
     # Write out the model
-    '''with open("model.txt", 'w') as out:
+    with open("model.txt", 'w') as out:
         out.write("BIAS\t%f\n" % mod.intercept_)
         for jj, kk in zip(features, mod.coef_):
-            out.write("%s\t%f\n" % (jj, kk))'''
-    
+            out.write("%s\t%f\n" % (jj, kk))
+
     # Write the predictions
-    pred_test = mod.predict(features_matrix)
+    pred_test = mod.predict(test_x[features])
     with open("pred.txt", 'w') as out:
         for ss, vv in sorted(zip(list(test_x.STATE), pred_test)):
             out.write("%s\t%f\n" % (ss, vv))
 
     # Calculate the Mean Squared Error
-    print("Mean Squared Error = %.2f" % np.mean((mod.predict(features_matrix) - train_x["GENERAL %"]) ** 2))
+    print("Mean Squared Error = %.2f" % np.mean((mod.predict(train_x[features]) - train_x["GENERAL %"]) ** 2))
