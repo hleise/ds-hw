@@ -2,7 +2,6 @@ import pandas
 import numpy as np
 from sklearn import linear_model
 
-
 def last_poll(full_data):
     """
     Create feature from last poll in each state
@@ -21,7 +20,7 @@ def last_poll(full_data):
     state_only = dedupe[dedupe["STATE"] != "US"]
 
     # Remove low obs polls
-    return state_only[state_only["OBS"] >= 500]
+    return state_only[state_only["OBS"] >= 250]
 
 
 if __name__ == "__main__":
@@ -89,4 +88,4 @@ if __name__ == "__main__":
             out.write("%s\t%f\n" % (ss, vv))
 
     # Calculate the Mean Squared Error
-    print("Mean Squared Error = %.2f" % np.mean((mod.predict(train_x[features]) - train_x["GENERAL %"]) ** 2))
+    #print("Mean Squared Error = %.2f" % np.mean((mod.predict(train_x[features]) - train_x["GENERAL %"]) ** 2))
