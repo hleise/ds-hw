@@ -1,3 +1,6 @@
+# Name: Hunter Leise
+# Late Days Used: 3
+
 import random
 from numpy import zeros, sign
 from math import exp, log
@@ -93,7 +96,9 @@ class LogReg:
         :return: The current vector of parameters
         """
 
-        # Your code here
+        pi = sigmoid(self.beta.dot(train_example.x))
+        gradient = (train_example.y - pi) * (train_example.x)
+        self.beta += (self.learning_rate * gradient)
 
         return self.beta
 
@@ -164,3 +169,15 @@ if __name__ == "__main__":
                 ho_lp, ho_acc = lr.progress(test)
                 print("Update %i\tTP %f\tHP %f\tTA %f\tHA %f" %
                       (update_number, train_lp, ho_lp, train_acc, ho_acc))
+
+    # For finding the best and worst predictors
+    # vocab2beta = defaultdict()
+    # for i in range(len(vocab)):
+    #     vocab2beta[vocab[i]] = lr.beta[i]
+    #
+    # for w in sorted(vocab2beta, key=vocab2beta.get, reverse=True):
+    #     print(w, vocab2beta[w])
+
+
+    # For finding the number of passes and updates
+    # print(args.passes, update_number)
