@@ -57,7 +57,7 @@ class LogReg:
         Create a logistic regression classifier
 
         :param num_features: The number of features (including bias)
-        :param step: A function that takes the iteration as an argument (the default is a constant value)
+        :param learning_rate: How big of a SG step we take
         """
 
         self.beta = zeros(num_features)
@@ -91,8 +91,6 @@ class LogReg:
         Compute a stochastic gradient update to improve the log likelihood.
 
         :param train_example: The example to take the gradient with respect to
-        :param iteration: The current iteration (an integer)
-        :param use_tfidf: A boolean to switch between the raw data and the tfidf representation
         :return: The current vector of parameters
         """
 
